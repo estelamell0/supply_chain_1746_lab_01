@@ -1,0 +1,44 @@
+# WORKFLOW BLINDADO - CONFORME SLSA v1.0 & OPENSSF SCORECARD 10/10
+# Referência: Controles remediados dos Slides 17, 18 e 19 da Aula 01
+name: CI Blindado DevSecOps
+
+on:
+  # REMEDIAÇÃO 1: Gatilho isolado 'pull_request' tradicional, sem acesso a secrets de produção
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# REMEDIAÇÃO 2: Princípio de menor privilégio rigoroso em nível de workflow
+permissions: read-all
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    # Permissão mínima restrita apenas para leitura de conteúdo
+    permissions:
+      contents: read
+
+    steps:
+      # REMEDIAÇÃO 3: Hash Pinning com commit SHA imutável de 40 caracteres (SLSA L3)
+      # actions/checkout@v4.1.7 fixado no commit exato
+      - name: Checkout Seguro
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          persist-credentials: false
+
+      - name: Configurar Python
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
+        with:
+          python-version: '3.11'
+
+      # REMEDIAÇÃO 4: Dependências locais via wrapper com verificação estrita de hash SHA-256
+      - name: Executar Agente de Telemetria Validado Criptograficamente
+        run: |
+          chmod +x scripts/secure_fetch.sh
+          ./scripts/secure_fetch.sh scripts/download_agent.sh
+
+      - name: Compilar Aplicação
+        run: |
+          python3 src/app.py
+

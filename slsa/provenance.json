@@ -1,0 +1,38 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "payment-api-dist.tar.gz",
+      "digest": {
+        "sha256": "b7afbbd09a3053433414af2402eb2e92f5347f82f6b7ceb3c50253f3eeb8a241"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://actions.github.com/v1",
+      "externalParameters": {
+        "repository": "https://github.com/empresa-ada/payment-api-service",
+        "ref": "refs/tags/v1.0.0",
+        "commit": "692973e3d937129bcbf40652eb9f2f61becf3332"
+      },
+      "internalParameters": {
+        "github": {
+          "event_name": "push",
+          "runner_environment": "github-hosted"
+        }
+      }
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/actions/runner@v2.317.0"
+      },
+      "metadata": {
+        "invocationId": "https://github.com/empresa-ada/payment-api-service/actions/runs/987654321",
+        "startedOn": "2026-10-30T14:00:00Z",
+        "finishedOn": "2026-10-30T14:02:30Z"
+      }
+    }
+  }
+}

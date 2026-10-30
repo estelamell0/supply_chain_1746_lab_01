@@ -1,0 +1,7 @@
+# Garantir terminadores de linha LF determinísticos para cálculos de hash SHA-256 idênticos em Windows, Linux e macOS
+*.sh text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+

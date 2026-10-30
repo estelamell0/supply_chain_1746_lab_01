@@ -1,0 +1,31 @@
+# WORKFLOW VULNERÁVEL - ESTEIRA DE CI/CD COM FALHAS CRÍTICAS DE SUPPLY CHAIN
+# Referência: Slide 17 & Slide 19 da Aula 01 (OpenSSF Scorecard & PPE)
+name: CI Legado Vulneravel
+
+on:
+  # FALHA 1 (Dangerous-Workflow): pull_request_target executa no contexto do repo base com segredos
+  pull_request_target:
+    types: [opened, synchronize]
+
+# FALHA 2 (Token-Permissions): Permissões máximas concedidas ao GITHUB_TOKEN
+permissions: write-all
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # FALHA 3 (Dangerous-Workflow / PPE): Faz checkout do código não confiável do fork do invasor
+      - name: Checkout Código do PR
+        uses: actions/checkout@v4 # FALHA 4 (Pinned-Dependencies): Tag mutável ao invés do SHA imutável
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # FALHA 5: Execução remota sem validação de integridade criptográfica (Caso Codecov)
+      - name: Instalar Agente de Cobertura
+        run: |
+          curl -s https://raw.githubusercontent.com/scripts-legados/telemetria.sh | bash
+
+      - name: Compilar Aplicação
+        run: |
+          python3 src/app.py
+
