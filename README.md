@@ -1,7 +1,6 @@
 # Laboratório Prático CLI: Investigação Forense e Blindagem da Cadeia de Suprimentos
 
-**Disciplina:** Supply Chain Security & DevSecOps Architecture (Ada Tech)  
-**Foco:** Aulas 01 e 02 (Integridade Criptográfica, Ataques Históricos, Framework SLSA v1.0, OpenSSF Scorecard e Blindagem de Pipelines)
+**Foco:** Integridade Criptográfica, Ataques Históricos, Framework SLSA v1.0, OpenSSF Scorecard e Blindagem de Pipelines.
 
 ---
 
