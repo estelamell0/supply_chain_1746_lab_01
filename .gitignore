@@ -1,0 +1,29 @@
+# ==============================================================================
+# .gitignore — Lab 01: CLI Supply Chain Integrity
+# ==============================================================================
+
+# Arquivos Sensíveis Internos e Materiais de Instrutor / Professor
+*teacher*
+*professor*
+*instrutor*
+*gabarito*
+*.guide.md
+
+# Chaves Criptográficas e Assinaturas Geradas em Aula (Prática Forense)
+privkey.pem
+pubkey.pem
+dist/release.sig
+dist/payment-api-dist.tar.gz
+
+# Dependências e Ambientes Virtuais
+node_modules/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Arquivos Temporários de Sistema Operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+

@@ -22,8 +22,9 @@ Neste laboratório 100% prático e executável em linha de comando, você atuar�
 
 ```text
 lab_01_cli_supply_chain_integrity/
-├── README.md                          # Este guia prático com comandos e fundamentação (Alunos)
-├── teacher_guide_lab_01.md            # Guia ultradetalhado do instrutor para condução ao vivo
+├── README.md                          # Este guia prático com roteiro passo a passo
+├── SETUP_AMBIENTE.md                  # Guia de instalação e configuração de PATH (Python/OpenSSL)
+├── .gitignore                         # Regras de exclusão para proteção e limpeza de repositório
 ├── .gitattributes                     # Preservação determinística de fim de linha LF
 ├── setup_lab.ps1                      # Inicializador automático para Windows (PowerShell)
 ├── setup_lab.sh                       # Inicializador automático para Linux / macOS / WSL / Git Bash
@@ -53,16 +54,22 @@ lab_01_cli_supply_chain_integrity/
 
 ## 3. Preparação do Ambiente (Setup)
 
+### Pré-requisitos de Sistema
+Antes de rodar a inicialização, certifique-se de ter os utilitários fundamentais instalados e disponíveis no seu `PATH`:
+- **Python 3.10+**: `python --version` (ou `python3 --version`)
+- **OpenSSL 1.1.1+ ou 3.x**: `openssl version`
+- **Git**: `git --version`
+
+> 💡 **Atenção (Configuração de Ambiente):** Se comandos como `openssl` ou `python` não forem reconhecidos no seu terminal, consulte o guia passo a passo em [SETUP_AMBIENTE.md](./SETUP_AMBIENTE.md) para instalar e configurar as variáveis de ambiente globalmente e de forma permanente em seu sistema operacional (Windows, Linux ou macOS).
+
 Abra o seu terminal na pasta do laboratório:
 
 ```bash
 # No Linux / macOS / WSL:
-chmod +x setup_lab.sh
-./setup_lab.sh
+chmod +x setup_lab.sh && ./setup_lab.sh
 
 # No Windows (PowerShell):
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\setup_lab.ps1
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\setup_lab.ps1
 ```
 
 O setup cria o pacote de release `dist/payment-api-dist.tar.gz`, calcula seu hash SHA-256 e sincroniza a atestação SLSA de referência em `slsa/provenance.json`.
@@ -115,18 +122,11 @@ No incidente Codecov de 2021, milhares de esteiras corporativas executavam `curl
 No ataque Sunspot (SolarWinds), o código-fonte no Git estava 100% limpo, mas o executável gerado foi modificado durante o milissegundo da compilação. Como um consumidor pode atestar que o artefato distribuído não foi alterado após ser assinado pela equipe autorizada?
 
 #### Execução
-> **Nota para usuários de Windows PowerShell:** Caso o comando `openssl` não esteja no `PATH` da sua janela atual do PowerShell, adicione o diretório do Git for Windows antes de iniciar a Fase 2:
-> ```powershell
-> $env:PATH += ";C:\Program Files\Git\usr\bin"
-> ```
+> **Nota sobre o OpenSSL:** O utilitário `openssl` é necessário para esta fase. Valide se ele está acessível com `openssl version`. Caso o comando não seja reconhecido no PowerShell ou terminal, consulte as instruções de configuração permanente em [SETUP_AMBIENTE.md](./SETUP_AMBIENTE.md).
 
-1. Gere um par de chaves assimétricas usando OpenSSL no terminal:
+1. Gere um par de chaves assimétricas usando OpenSSL no terminal (chave privada ECDSA e chave pública em linha única):
    ```bash
-   # Gerar chave privada ECDSA (curva P-256):
-   openssl ecparam -genkey -name prime256v1 -out privkey.pem
-
-   # Extrair a chave pública correspondente:
-   openssl ec -in privkey.pem -pubout -out pubkey.pem
+   openssl ecparam -genkey -name prime256v1 -out privkey.pem && openssl ec -in privkey.pem -pubout -out pubkey.pem
    ```
 
 2. Assine digitalmente o pacote de release oficial gerado no setup:
@@ -215,14 +215,13 @@ No nível de maturidade **SLSA Build Level 3**, cada artefato gerado deve vir ac
    ```
    *Resultado:* `[SUCESSO] VALIDAÇÃO SLSA APROVADA!`
 
-4. Altere o artefato adicionando qualquer dado espúrio e re-execute o validador:
+4. Altere o artefato adicionando dado espúrio e re-execute o validador (em linha única):
    ```bash
    # Bash:
-   echo "tampered" >> dist/payment-api-dist.tar.gz
-   # PowerShell:
-   Add-Content -Path dist/payment-api-dist.tar.gz -Value "tampered"
+   echo "tampered" >> dist/payment-api-dist.tar.gz && python slsa/verify_provenance.py --artifact dist/payment-api-dist.tar.gz --provenance slsa/provenance.json
 
-   python slsa/verify_provenance.py --artifact dist/payment-api-dist.tar.gz --provenance slsa/provenance.json
+   # PowerShell:
+   Add-Content -Path dist/payment-api-dist.tar.gz -Value "tampered"; python slsa/verify_provenance.py --artifact dist/payment-api-dist.tar.gz --provenance slsa/provenance.json
    ```
    *Resultado:* `[FALHA CRÍTICA] DIVERGÊNCIA DE PROVENIÊNCIA DETECTADA!` (Código de saída 2).
 
@@ -274,24 +273,5 @@ Ao concluir o laboratório, responda às seguintes perguntas técnicas:
 3. **Qual a vulnerabilidade fundamental na instrução `actions/checkout@v4` e por que a fixação por commit SHA (40 caracteres) é mandatório para conformidade com o nível SLSA L3?**
 4. **Em um ataque de Poisoned Pipeline Execution (PPE) alavancado por `pull_request_target`, qual recurso da esteira o atacante obtém e como a restrição `permissions: read-all` reduz o raio de explosão?**
 
----
-
-## 6. Gabarito Resumido das Questões de Fixação
-
-<details>
-<summary><strong>Clique para expandir o Gabarito Oficial</strong></summary>
-
-1. **`npm install` vs `npm ci`:**  
-   O `npm install` é permissivo: caso encontre divergências ou operadores de range (`^`), ele pode resolver versões mais novas e reescrever o `package-lock.json` em tempo de execução, permitindo que pacotes maliciosos recém-publicados entrem no build. O `npm ci` (Clean Install) é estrito e determinístico: ele nunca altera o lockfile, apaga a pasta `node_modules` e falha imediatamente se o `package.json` e o `package-lock.json` não coincidirem exatamente em versões e hashes de integridade SHA-512.
-
-2. **Assinatura SolarWinds:**  
-   A assinatura tradicional valida apenas que o binário foi assinado pela autoridade da chave privada corporativa. Como o malware *Sunspot* adulterou os arquivos-fonte em memória durante a compilação do `csc.exe` *antes* da fase de assinatura, o binário já foi gerado infectado e depois assinado legitimamente. Sem ambientes de build herméticos e isolados (SLSA L3) e compilação reproduzível, a assinatura atesta com sucesso um artefato comprometido.
-
-3. **Fragilidade de Tags Mutáveis:**  
-   Tags no Git (como `@v4` ou `@v1.2.0`) são ponteiros mutáveis que podem ser deletados e recriados apontando para qualquer commit por qualquer conta com permissão de escrita no repositório da action. Fixar pelo commit SHA de 40 caracteres garante imutabilidade matemática garantida pelo grafo do Git (Merkle Tree).
-
-4. **PPE e `pull_request_target`:**  
-   O gatilho `pull_request_target` executa no contexto do repositório base e tem acesso direto aos secrets da organização (ex: tokens de nuvem, credenciais de deploy). Se o workflow fizer checkout do código enviado pelo PR externo não confiável e executar comandos (como scripts de teste ou build), o código do invasor roda com acesso total aos segredos. Definir `permissions: read-all` impede que o token herdado possua poderes de escrita no repositório, mitigando a capacidade do invasor de injetar commits maliciosos na branch `main`.
-
-</details>
+> 💡 **Critérios de Autoavaliação:** Ao formular suas respostas, certifique-se de referenciar evidências técnicas concretas obtidas durante o laboratório (ex: hashes SHA-256, verificações `Verified OK`, logs do OpenSSF Scorecard e comparativos de comandos). Utilize essas questões para consolidar os fundamentos abordados nas aulas e validar seu entendimento prático.
 

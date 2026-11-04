@@ -77,13 +77,10 @@ if (Test-Path -LiteralPath $ProvPath) {
 
 # 6. Verificar disponibilidade do OpenSSL na sessao PowerShell
 if (-not (Get-Command openssl -ErrorAction SilentlyContinue)) {
-    $GitOpenSslDir = "C:\Program Files\Git\usr\bin"
-    if (Test-Path -LiteralPath (Join-Path $GitOpenSslDir "openssl.exe")) {
-        Write-Host "[DICA WINDOWS] Para usar 'openssl' diretamente nesta janela do PowerShell, execute:" -ForegroundColor Yellow
-        Write-Host "    `$env:PATH += ';$GitOpenSslDir'" -ForegroundColor Cyan
-    }
+    Write-Host "[AVISO] 'openssl' nao foi detectado no PATH do sistema." -ForegroundColor Yellow
+    Write-Host "        Consulte SETUP_AMBIENTE.md para instrucoes de instalacao e configuracao permanente." -ForegroundColor Yellow
 }
 
 Write-Host "------------------------------------------------------------------"
 Write-Host "[OK] Ambiente do laboratorio pronto para execucao!" -ForegroundColor Green
-Write-Host "Consulte README.md (alunos) ou teacher_guide_lab_01.md (instrutor)."
+Write-Host "Consulte README.md para iniciar as atividades praticas."

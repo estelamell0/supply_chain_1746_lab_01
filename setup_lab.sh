@@ -86,4 +86,4 @@ chmod +x scripts/*.sh tools/*.py slsa/*.py 2>/dev/null || true
 
 echo "------------------------------------------------------------------"
 echo "[OK] Ambiente do laboratório pronto para execução!"
-echo "Consulte README.md (alunos) ou teacher_guide_lab_01.md (instrutor)."
+echo "Consulte README.md para iniciar as atividades práticas."
